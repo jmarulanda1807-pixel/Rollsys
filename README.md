@@ -23,6 +23,7 @@ Python, Django, SQLite (en desarrollo), HTML y CSS.
     pip install -r requirements.txt
     python manage.py migrate
     python manage.py createsuperuser
+    python manage.py cargar_ejemplo
     python manage.py runserver
 
 Luego abre http://localhost:8000/ y entra con el usuario que creaste. Los productos se cargan desde http://localhost:8000/admin/ (categorías, proveedores, productos y sus variantes).
@@ -42,3 +43,7 @@ Nadie escribe directo en `main`. Cada tarea va en su propia rama (`feature/nombr
 ## Equipo
 
 Pendiente: nombres de los integrantes.
+
+## Guía completa de comandos
+
+Todos los comandos del proyecto, paso a paso (instalación, Git y GitHub, ramas y enlace público para compartir), están en [docs/GUIA_COMANDOS.md](docs/GUIA_COMANDOS.md).
