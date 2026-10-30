@@ -1,0 +1,6 @@
+{% extends "tienda/base.html" %}{% load static %}{% block contenido %}
+<h1>Pedidos a proveedores</h1><p class="sub">Avanza cada pedido por la pista. Al llegar, el stock sube solo.</p>
+<div class="g">{% for p in pedidos %}<div class="c s12"><div class="row" style="border:0;padding-top:0"><div><strong>{{ p.cantidad }} × {{ p.variante.producto.nombre }}</strong><small>{{ p.proveedor|default:"Proveedor por asignar" }}</small></div>{% if p.siguiente %}<form method="post">{% csrf_token %}<input type="hidden" name="accion" value="avanzar"><input type="hidden" name="id" value="{{ p.id }}"><button class="btn">Avanzar a {{ p.siguiente }}</button></form>{% else %}<span class="tag ok">Recibido</span>{% endif %}</div>
+<div class="road"><i class="fill" style="width:{{ p.pct }}%"></i>{% for s in p.paradas %}<i class="st {% if s.on %}on{% endif %}" style="left:{{ s.left }}%"></i>{% endfor %}<img src="{% static 'tienda/emblema.png' %}" alt="" style="left:{{ p.pct }}%"></div>
+<div class="lbls">{% for s in p.paradas %}<span>{{ s.n }}</span>{% endfor %}</div></div>{% empty %}<div class="c s12"><p class="lab">No hay pedidos. Crea uno desde “Para reponer” en el Panel.</p></div>{% endfor %}</div>
+{% endblock %}

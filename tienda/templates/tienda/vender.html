@@ -1,0 +1,10 @@
+{% extends "tienda/base.html" %}{% block contenido %}
+<h1>Vender</h1><p class="sub">Escribe cuántas unidades lleva el cliente. Lo agotado se bloquea solo.</p>
+<div class="pos"><div>
+<form method="get" class="tools"><input name="q" placeholder="Buscar patín o accesorio" value="{{ q }}"><button class="btn ghost">Buscar</button></form>
+<div class="tools"><a class="chip {% if not cat %}on{% endif %}" href="?q={{ q }}" style="text-decoration:none">Todo</a>{% for c in categorias %}<a class="chip {% if cat == c.nombre %}on{% endif %}" href="?q={{ q }}&cat={{ c.nombre|urlencode }}" style="text-decoration:none">{{ c.nombre }}</a>{% endfor %}</div>
+<form method="post" id="f">{% csrf_token %}<div class="pg">{% for v in variantes %}<label class="p {% if not v.stock %}ag{% endif %}"><strong>{{ v.producto.nombre }}</strong><span class="lab">{{ v.talla }} {{ v.color }}</span>{% include "tienda/_ruedas.html" %}<span><b>${{ v.producto.precio_venta|floatformat:"0g" }}</b> <small>{% if v.stock %}{{ v.stock }} disp.{% else %}agotado{% endif %}</small></span><input type="number" name="q_{{ v.id }}" min="0" max="{{ v.stock }}" value="0" data-precio="{{ v.producto.precio_venta|floatformat:'0u' }}" {% if not v.stock %}disabled{% endif %}></label>{% empty %}<p class="lab">No hay productos con ese filtro.</p>{% endfor %}</div>
+</div>
+<div class="c cart"><h2>Venta actual</h2><div class="row"><strong>Total</strong><span class="num" id="tot">$0</span></div><div class="tools"><select name="metodo"><option value="EFECTIVO">Efectivo</option><option value="TRANSFERENCIA">Transferencia</option><option value="TARJETA">Tarjeta</option></select><select name="pagada"><option value="1">Pagado</option><option value="0">Pendiente</option></select></div><button class="btn" style="width:100%">Registrar venta</button></div></form></div>
+<script>const ins=[...document.querySelectorAll("input[data-precio]")],calc=()=>{document.getElementById("tot").textContent="$"+ins.reduce((a,i)=>a+i.value*i.dataset.precio,0).toLocaleString("es-CO")};ins.forEach(i=>i.oninput=calc)</script>
+{% endblock %}

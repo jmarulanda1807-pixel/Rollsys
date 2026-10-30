@@ -1,0 +1,4 @@
+{% load static %}<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Entrar a RollSys</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap"><link rel="stylesheet" href="{% static 'tienda/rollsys.css' %}"></head>
+<body><main style="margin:auto;max-width:420px;padding-top:6vh"><div class="logo" style="margin-bottom:20px"><img src="{% static 'tienda/logo.png' %}" alt="RollSys"></div>
+<form method="post" class="c">{% csrf_token %}<h2>Entrar</h2>{{ form.non_field_errors }}<p><label>Usuario<br>{{ form.username }}</label></p><p><label>Contraseña<br>{{ form.password }}</label></p><button class="btn" style="width:100%">Entrar</button></form></main></body></html>

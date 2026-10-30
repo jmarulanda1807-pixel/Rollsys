@@ -1,10 +1,14 @@
+"""
+Reglas de negocio. Mantener esta lógica fuera de las vistas facilita probarla.
+Todo se hace dentro de una transacción: si algo falla, no se guarda nada.
+"""
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import F
 
 from .models import Compra, DetalleCompra, DetalleVenta, Variante, Venta
 
+# Programa de fidelidad: 1 punto por cada X de compra (ajustar con el dueño).
 VALOR_POR_PUNTO = Decimal("10000")
 
 
@@ -13,16 +17,21 @@ class StockInsuficiente(Exception):
 
 
 @transaction.atomic
-def registrar_venta(vendedor, items, cliente=None, metodo_pago=Venta.MetodoPago.EFECTIVO):
+def registrar_venta(vendedor, items, cliente=None, metodo_pago=Venta.MetodoPago.EFECTIVO, pagada=True):
+    """
+    items: lista de dicts -> [{"variante_id": 1, "cantidad": 2}, ...]
+    Descuenta el stock, calcula el total y suma puntos al cliente.
+    """
     if not items:
         raise ValueError("La venta debe tener al menos un producto.")
 
     venta = Venta.objects.create(
-        vendedor=vendedor, cliente=cliente, metodo_pago=metodo_pago
+        vendedor=vendedor, cliente=cliente, metodo_pago=metodo_pago, pagada=pagada
     )
     total = Decimal("0")
 
     for item in items:
+        # select_for_update bloquea la fila para evitar ventas simultáneas del mismo stock
         variante = (
             Variante.objects.select_for_update()
             .select_related("producto")
@@ -57,6 +66,7 @@ def registrar_venta(vendedor, items, cliente=None, metodo_pago=Venta.MetodoPago.
 
 @transaction.atomic
 def anular_venta(venta):
+    """Anula una venta y devuelve el stock."""
     if venta.estado == Venta.Estado.ANULADA:
         raise ValueError("La venta ya está anulada.")
 
@@ -77,6 +87,10 @@ def anular_venta(venta):
 
 @transaction.atomic
 def registrar_compra(proveedor, usuario, items):
+    """
+    items: lista de dicts -> [{"variante_id": 1, "cantidad": 10, "costo_unitario": 85000}, ...]
+    Aumenta el stock y actualiza el precio de costo de cada variante.
+    """
     if not items:
         raise ValueError("La compra debe tener al menos un producto.")
 
@@ -102,6 +116,9 @@ def registrar_compra(proveedor, usuario, items):
 
 
 def variantes_con_stock_bajo():
+    """Para el dashboard y las alertas de reposición."""
+    from django.db.models import F
+
     return Variante.objects.select_related("producto").filter(
         stock__lte=F("stock_minimo"), producto__activo=True
     )

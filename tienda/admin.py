@@ -9,6 +9,7 @@ from .models import (
     Producto,
     Proveedor,
     Variante,
+    Pedido,
     Venta,
 )
 
@@ -60,3 +61,4 @@ class CompraAdmin(admin.ModelAdmin):
 admin.site.register(Categoria)
 admin.site.register(Proveedor)
 admin.site.register(Cliente)
+admin.site.register(Pedido)

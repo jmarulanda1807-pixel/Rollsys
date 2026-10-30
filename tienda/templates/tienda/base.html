@@ -1,0 +1,18 @@
+{% load static %}<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>RollSys</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Figtree:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@1,9..144,800,100,1&display=swap">
+<link rel="stylesheet" href="{% static 'tienda/rollsys.css' %}"></head><body>
+<div class="app"><aside><div class="logo"><img src="{% static 'tienda/logo.png' %}" alt="RollSys"></div>
+<nav>
+<a href="{% url 'panel' %}" class="{% if vista == 'panel' %}on{% endif %}">Panel</a>
+<a href="{% url 'vender' %}" class="{% if vista == 'vender' %}on{% endif %}">Vender</a>
+<a href="{% url 'inventario' %}" class="{% if vista == 'inventario' %}on{% endif %}">Inventario{% if n_bajo %}<b>{{ n_bajo }}</b>{% endif %}</a>
+<a href="{% url 'pedidos' %}" class="{% if vista == 'pedidos' %}on{% endif %}">Pedidos{% if n_ped %}<b>{{ n_ped }}</b>{% endif %}</a>
+<a href="{% url 'cobros' %}" class="{% if vista == 'cobros' %}on{% endif %}">Cobros{% if n_cobrar %}<b>{{ n_cobrar }}</b>{% endif %}</a>
+</nav>
+<div class="aside-out"><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn ghost">Salir</button></form></div></aside>
+<main><img class="pl" src="{% static 'tienda/logo.png' %}" alt="RollSys">{% block contenido %}{% endblock %}</main></div>
+<div id="toast" role="status"></div>
+{% for m in messages %}<span class="msg">{{ m }}</span>{% endfor %}
+<script>const m=document.querySelector(".msg"),t=document.getElementById("toast");if(m){t.textContent=m.textContent;t.className="on";setTimeout(()=>t.className="",3200)}</script>
+</body></html>

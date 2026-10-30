@@ -1,0 +1,4 @@
+{% extends "tienda/base.html" %}{% block contenido %}
+<h1>Inventario</h1><p class="sub">Cada rueda es una unidad, hasta ocho. Cuando se ponen naranja, toca reponer.</p>
+<div class="c scroll"><table><tr><th>Producto</th><th>Stock</th><th>Mínimo</th><th></th></tr>{% for v in variantes %}<tr><td><strong>{{ v.producto.nombre }}</strong><br><small class="lab">{{ v.producto.categoria }} · {{ v.talla }} {{ v.color }} · ${{ v.producto.precio_venta|floatformat:"0g" }}</small></td><td>{% include "tienda/_ruedas.html" %} <b>{{ v.stock }}</b></td><td>{{ v.stock_minimo }}</td><td><form method="post">{% csrf_token %}<input type="hidden" name="id" value="{{ v.id }}"><button class="btn ghost">+5 ingreso</button></form></td></tr>{% empty %}<tr><td colspan="4">Aún no hay productos. Créalos en el panel de administración.</td></tr>{% endfor %}</table></div>
+{% endblock %}

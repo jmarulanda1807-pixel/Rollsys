@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-sxg8q=#dq*f7tm&=uf$z77)j0dtxh#ypm#i%t4^+(a6svpp44^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".trycloudflare.com"]
 
 
 # Application definition
@@ -126,3 +126,9 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "panel"
+LOGOUT_REDIRECT_URL = "login"
+
+CSRF_TRUSTED_ORIGINS = ["https://*.trycloudflare.com"]

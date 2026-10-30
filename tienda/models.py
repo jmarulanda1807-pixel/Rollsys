@@ -1,3 +1,12 @@
+"""
+Modelos de la tienda de patines.
+
+Relaciones principales:
+  Categoria 1---N Producto 1---N Variante (talla/color/stock)
+  Cliente   1---N Venta    1---N DetalleVenta N---1 Variante
+  Usuario   1---N Venta   (el vendedor que registró la venta)
+  Proveedor 1---N Compra   1---N DetalleCompra N---1 Variante
+"""
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -30,6 +39,8 @@ class Proveedor(models.Model):
 
 
 class Producto(models.Model):
+    """Modelo general del patín o accesorio (ej. 'Patín en línea Pro X')."""
+
     nombre = models.CharField(max_length=120)
     marca = models.CharField(max_length=80, blank=True)
     categoria = models.ForeignKey(
@@ -49,6 +60,8 @@ class Producto(models.Model):
 
 
 class Variante(models.Model):
+    """Combinación concreta de un producto: talla + color. Aquí vive el stock."""
+
     producto = models.ForeignKey(
         Producto, on_delete=models.CASCADE, related_name="variantes"
     )
@@ -70,6 +83,11 @@ class Variante(models.Model):
         ]
 
     @property
+    def ruedas(self):
+        bajo = self.stock <= self.stock_minimo
+        return [("lo" if bajo else "") if i < self.stock else "off" for i in range(8)]
+
+    @property
     def stock_bajo(self):
         return self.stock <= self.stock_minimo
 
@@ -82,7 +100,7 @@ class Cliente(models.Model):
     documento = models.CharField(max_length=30, unique=True, blank=True, null=True)
     telefono = models.CharField(max_length=30, blank=True)
     email = models.EmailField(blank=True)
-    puntos = models.PositiveIntegerField(default=0)
+    puntos = models.PositiveIntegerField(default=0)  # programa de fidelidad
     creado = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -115,6 +133,7 @@ class Venta(models.Model):
     estado = models.CharField(
         max_length=12, choices=Estado.choices, default=Estado.COMPLETADA
     )
+    pagada = models.BooleanField(default=True)
     total = models.DecimalField(max_digits=14, decimal_places=2, default=0)
 
     class Meta:
@@ -128,6 +147,7 @@ class DetalleVenta(models.Model):
     venta = models.ForeignKey(Venta, on_delete=models.CASCADE, related_name="detalles")
     variante = models.ForeignKey(Variante, on_delete=models.PROTECT)
     cantidad = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    # Se guarda el precio al momento de la venta, aunque luego cambie en el producto.
     precio_unitario = models.DecimalField(max_digits=12, decimal_places=2)
 
     @property
@@ -166,3 +186,33 @@ class DetalleCompra(models.Model):
     @property
     def subtotal(self):
         return self.cantidad * self.costo_unitario
+
+
+class Pedido(models.Model):
+    """Pedido de reposición a un proveedor, con seguimiento de estado."""
+
+    ESTADOS = ["Pedido", "Confirmado", "En camino", "Recibido"]
+
+    variante = models.ForeignKey(Variante, on_delete=models.PROTECT, related_name="pedidos")
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True)
+    cantidad = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    estado = models.PositiveSmallIntegerField(default=0)
+    creado = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-creado"]
+
+    @property
+    def siguiente(self):
+        return self.ESTADOS[self.estado + 1] if self.estado < 3 else None
+
+    @property
+    def pct(self):
+        return round(self.estado / 3 * 100)
+
+    @property
+    def paradas(self):
+        return [{"n": n, "on": i <= self.estado, "left": round(i / 3 * 100)} for i, n in enumerate(self.ESTADOS)]
+
+    def __str__(self):
+        return f"Pedido #{self.pk} - {self.variante}"
