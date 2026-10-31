@@ -141,3 +141,69 @@ El enlace `https://....trycloudflare.com` cambia cada vez. Funciona solo mientra
 - **`Incorrect timezone setting`:** usar `America/Bogota`, no `UTC-5`.
 - **`dpkg was interrupted`:** `sudo dpkg --configure -a` y repetir la instalación.
 - **`Key is invalid` en GitHub:** copiar la clave con `code ~/.ssh/id_ed25519.pub`, `Ctrl + A`, `Ctrl + C`.
+
+## 12. Encender RollSys con un solo comando
+
+Crear el script (una sola vez):
+
+```bash
+cat > ~/iniciar-rollsys.sh << 'EOF'
+#!/bin/bash
+cd ~/tienda-patines
+source venv/bin/activate
+(sleep 4 && xdg-open http://localhost:8000/ >/dev/null 2>&1) &
+python manage.py runserver
+EOF
+chmod +x ~/iniciar-rollsys.sh
+```
+
+Para encender el sistema cada vez:
+
+```bash
+~/iniciar-rollsys.sh
+```
+
+Entra a la carpeta, activa el entorno, enciende el servidor y abre el navegador. Para apagarlo: `Ctrl + C`.
+
+## 13. El facturador (HTML)
+
+Es una página independiente, sin Django ni base de datos, hecha con HTML, CSS y JavaScript en un solo archivo. Sirve para emitir comprobantes de venta con número consecutivo, imprimirlos o guardarlos en PDF y ver el historial.
+
+Estructura dentro del repositorio:
+
+- `index.html`: portada con el logo y un botón que abre el facturador.
+- `facturador/index.html`: el facturador.
+
+El logo se toma de `tienda/static/tienda/logo.png`, por eso la ruta en el facturador es `../tienda/static/tienda/logo.png`.
+
+Mover el facturador a su carpeta (ya hecho):
+
+```bash
+mkdir facturador
+git mv facturador.html facturador/index.html
+sed -i 's#src="tienda/static/tienda/logo.png"#src="../tienda/static/tienda/logo.png"#' facturador/index.html
+sed -i 's#href="facturador.html"#href="facturador/"#' index.html
+```
+
+Para modificarlo: `code facturador/index.html`, guardar con `Ctrl + S` y luego `git add .`, `git commit -m "Describe el cambio"` y `git push`.
+
+Cosas que se configuran dentro del facturador, en la pestaña Ajustes: nombre de la tienda, NIT, dirección, teléfono, prefijo de numeración, próximo número, IVA y el texto al pie. El IVA queda en 0 %: debe confirmarse con el contador de la tienda.
+
+Notas importantes:
+
+- Los comprobantes se guardan solo en el navegador de cada persona. No pasan a otro computador ni a la base de datos de Django.
+- Es un comprobante de venta. No reemplaza la factura electrónica de la DIAN.
+
+## 14. Publicar con GitHub Pages
+
+1. El repositorio debe ser público (Settings, sección Danger Zone, Change repository visibility).
+2. En Settings, entrar a Pages (`github.com/jmarulanda1807-pixel/Rollsys/settings/pages`).
+3. En Source dejar Deploy from a branch, elegir la rama `main` y la carpeta `/ (root)`, y presionar Save.
+4. Esperar de 1 a 2 minutos y abrir los enlaces:
+
+```
+https://jmarulanda1807-pixel.github.io/Rollsys/
+https://jmarulanda1807-pixel.github.io/Rollsys/facturador/
+```
+
+Si sale un 404, esperar un minuto y recargar con `Ctrl + Shift + R`. Cada vez que se haga `git push`, la página se actualiza sola.

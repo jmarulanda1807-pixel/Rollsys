@@ -47,3 +47,11 @@ Pendiente: nombres de los integrantes.
 ## Guía completa de comandos
 
 Todos los comandos del proyecto, paso a paso (instalación, Git y GitHub, ramas y enlace público para compartir), están en [docs/GUIA_COMANDOS.md](docs/GUIA_COMANDOS.md).
+
+## Facturador
+
+Además del sistema de Django, el repositorio incluye un facturador en HTML para emitir comprobantes de venta, imprimirlos o guardarlos en PDF. Se puede abrir sin instalar nada:
+
+https://jmarulanda1807-pixel.github.io/Rollsys/facturador/
+
+Los comprobantes se guardan en el navegador de cada persona y no reemplazan la factura electrónica de la DIAN.
